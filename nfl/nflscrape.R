@@ -40,24 +40,51 @@ pbp20 <- formatPBP(2020)
 pbp19 <- formatPBP(2019)
 
 masterfile <- rbind(pbp21, pbp20, pbp19)
-masterfile$time_intervals <- ceiling(masterfile$game_seconds_remaining / 60)
-masterfile$yard_intervals <- ceiling(masterfile$yardline_100 / 10) * 10
-
-raw <- load_pbp(2021)
-
-intervals <- masterfile %>% group_by(time_intervals, yard_intervals) %>%
-  summarise(n=n())
 
 MOVfit <- lm(finalMOV ~ eMOV + game_seconds_remaining, data=masterfile)
-interceptM <- summary(MOVfit)$coefficients[1,1]
-currentMOV <- summary(MOVfit)$coefficients[2,1]
-totalsecleft <- summary(MOVfit)$coefficients[3,1]
-write.csv(summary(MOVfit)$coefficients[,1],'C:/Users/drewm/Desktop/nflLive/MOVreg.csv')
-
 OUfit <- lm(finalOU ~ currentOU + game_seconds_remaining + total_line, data=masterfile)
-interceptO <- summary(OUfit)$coefficients[1,1]
-currenttotal <- summary(OUfit)$coefficients[2,1]
-totalSecleft <- summary(OUfit)$coefficients[3,1]
-OU <- summary(OUfit)$coefficients[4,1]
-write.csv(summary(OUfit)$coefficients[,1],'C:/Users/drewm/Desktop/nflLive/OUreg.csv')
 
+write.csv(summary(MOVfit)$coefficients[,1],'C:/Users/drewm/liveBetting/nfl/MOVreg.csv')
+write.csv(summary(OUfit)$coefficients[,1],'C:/Users/drewm/liveBetting/nfl/OUreg.csv')
+
+
+# roof types (type of roof for each home team's stadium)
+
+roof_df <- data.frame(a = c(rep(NA,32)), b=c(rep("outdoors",32)))
+roof_df$a <- c("ARI","ATL","BAL","BUF","CAR","CHI","CIN","CLE","DAL","DEN","DET",
+               "GB","HOU","IND","JAX","KC","LAC","LAR","LV","MIA","MIN","NE","NO",
+               "NYG","NYJ","PHI","PIT","SEA","SF","TB","TEN","WAS")
+roof_df[which(roof_df$a=="LV" | roof_df$a=="NO" |
+                roof_df$a=="DET" | roof_df$a=="LAR" |
+                roof_df$a=="LAC" | roof_df$a=="MIN"),2] <- "dome"
+
+write.csv(roof_df,'C:/Users/drewm/Desktop/liveBetting/nfl/roof_df.csv',row.names = FALSE)
+
+# slate info (number of games per slate)
+
+slate_df <- data.frame(a = c(rep(c(1:18),5), c(4,5,8,10)),
+                       b = c(rep("T",18), rep("S",54), rep("M",18), rep("S", 4)), 
+                       c = c(rep("N",18), rep("M",18), rep("A",18),rep("N",36), rep("E",4)), 
+                       d = c(rep(1,18), rep(9,18), rep(4,18), rep(1,36), rep(1,4)))
+colnames(slate_df) <- c("Week","Day","Time","Games")
+
+slate_df[which((slate_df$Week==6 | slate_df$Week==8 |
+                  slate_df$Week==9 | slate_df$Week==11 |
+                  slate_df$Week==13) & slate_df$Time=="M"),4] <- 8
+
+slate_df[which((slate_df$Week==2 | slate_df$Week==7 |
+                  slate_df$Week==10 | slate_df$Week==12 |
+                  slate_df$Week==14) & slate_df$Time=="M"),4] <- 7
+
+slate_df[which((slate_df$Week==4 | slate_df$Week==5 |
+                 slate_df$Week==6 | slate_df$Week==10 |
+                  slate_df$Week==11 | slate_df$Week==14 |
+                  slate_df$Week==15) & slate_df$Time=="A"),4] <- 3
+
+slate_df[which(slate_df$Week==2 & slate_df$Time=="A"),4] <- 5
+slate_df[which(slate_df$Week==2 & slate_df$Day=="M"),4] <- 2
+slate_df[which(slate_df$Week==9 & slate_df$Time=="A"),4] <- 2
+slate_df[which(slate_df$Week==12 & slate_df$Day=="T"),4] <- 3
+slate_df[which(slate_df$Week==15 & slate_df$Time=="M"),4] <- 5
+
+write.csv(slate_df,'C:/Users/drewm/Desktop/liveBetting/nfl/slate_df.csv',row.names = FALSE)
