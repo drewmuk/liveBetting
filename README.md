@@ -1,6 +1,6 @@
 # NFL & NBA Live
 
-NFL: Using the nflfastR database to get play-by-play data (2019-2021).
+NFL: Using the nflfastR database to get play-by-play data (2019-2022).
 
 NBA: Using the hoopR package to get play-by-play data (2020-2022).
 
